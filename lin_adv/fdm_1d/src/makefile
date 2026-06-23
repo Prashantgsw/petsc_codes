@@ -36,5 +36,8 @@ solve.mod: solve.F90 variables.mod double.mod
 %.o: %.F90 $(MOD)
 	$(FC) $(FFLAGS) -c -o $@ $<
 
+verify_convergence: verify_convergence.f90
+	$(FC) -O3 -o $@ $< -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -llapack -lblas
+
 clean:
-	rm -f *.mod *.o $(OBJ) $(TARGET) *.dat
+	rm -f *.mod *.o $(OBJ) $(TARGET) *.dat verify_convergence
