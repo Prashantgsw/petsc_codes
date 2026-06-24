@@ -37,4 +37,4 @@ solve.mod: solve.F90 variables.mod double.mod
 	$(FC) $(FFLAGS) -c -o $@ $<
 
 clean:
-	rm -f *.mod *.o $(OBJ) $(TARGET) *.dat verify_convergence
+	rm -f *.mod *.o $(OBJ) $(TARGET) *.dat
