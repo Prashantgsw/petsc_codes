@@ -125,6 +125,8 @@ enddo
 res = res * idx
 end subroutine CD8
 
+! LELE_CD4 is the lele compact difference scheme of order 4
+
 subroutine LELE_CD4(ua, res, ctx)
 implicit none
 type(tsdata) :: ctx
@@ -368,9 +370,8 @@ subroutine pdma(e3, a3, b3, c3, f3, d3, xa, N)
    real(dp),    intent(in)  :: d3(1:N)   
    PetscScalar, intent(out) :: xa(1:N)   
 
-   !-------------------------------------------
    ! Local working arrays
-   !-------------------------------------------
+  
    real(dp), allocatable :: beta(:), gamma(:)
    real(dp) :: c_mod(1:N)
    real(dp) :: factor1, factor2, a3_mod

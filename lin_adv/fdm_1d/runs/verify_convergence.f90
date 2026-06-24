@@ -9,10 +9,8 @@
 
 ! Computes L2 error and observed order
 ! for LELE_CD6, LELE_CD8 and LELE_CD10 schemes.
-!build explicitly-- make verify_convergence
 
-
-program verify_convergence !build explicitly-- make verify_convergence
+program verify_convergence !build explicitly-- make ./verify_convergence
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: pi = 3.14159265358979323846_dp
@@ -114,4 +112,5 @@ contains
   end subroutine compute_error
 
 end program verify_convergence  
+
 !gfortran -o verify_convergence verify_convergence.f90 -llapack -lblas
