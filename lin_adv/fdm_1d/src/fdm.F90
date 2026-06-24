@@ -125,7 +125,7 @@ enddo
 res = res * idx
 end subroutine CD8
 
-! LELE_CD4 is the lele compact difference scheme of order 4
+! LELE_CD4 is the lele compact difference scheme of 4th order
 
 subroutine LELE_CD4(ua, res, ctx)
 implicit none
@@ -173,7 +173,7 @@ res(ist:ien) = res_tmp(ist:ien)
 
 end subroutine LELE_CD4
 
-
+!LELE compact differene scheme of 6th order
 subroutine LELE_CD6(ua, res, ctx)
 implicit none
 type(tsdata) :: ctx
@@ -220,6 +220,7 @@ res(ist:ien) = res_tmp(ist:ien)
 
 end subroutine LELE_CD6
 
+!LELE compact scheme of 8th order
 subroutine LELE_CD8(ua, res, ctx)
 implicit none
 type(tsdata) :: ctx
@@ -270,7 +271,7 @@ res(ist:ien) = res_tmp(ist:ien)
 
 end subroutine LELE_CD8
 
-
+!LELE compact difference scheme of 10th order
 subroutine LELE_CD10(ua, res, ctx)
 implicit none
 type(tsdata) :: ctx
