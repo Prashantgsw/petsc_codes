@@ -50,28 +50,19 @@ type(tsdata)   :: ctx
  
 if(rank == 0)then
 
-  select case(trim(space_disc))
-  case('CD2')
-    stencil_width = 1
-  case('CD4')
-    stencil_width = 2
-  case('CD6')
-    stencil_width = 3
-  case('CD8')
-    stencil_width = 4
-  case('LELE')
-    stencil_width = 10
-  case default
-    print*, 'please select a finite difference method in space'
-    print*, 'Available options: CD2'
-    stop
-  end select
+   print*, 'please select a finite difference method in space'
+   print*, 'Available options: CD2, CD4, CD6, CD8, LELE_CD4, LELE_CD6, LELE_CD8, LELE_CD10'
+   read(*,*) space_disc
+
+   print*, "Enter stencil width"
+   read(*,*) stencil_width
 
 endif
 
 call MPI_Barrier(PETSC_COMM_WORLD, ierr)
 
 call MPI_Bcast(stencil_width, 1, MPI_int, 0, PETSC_COMM_WORLD, ierr)
+call MPI_Bcast(space_disc,64,MPI_CHARACTER,0,PETSC_COMM_WORLD,ierr)
 
 end subroutine set_and_braodcast_parameters
 

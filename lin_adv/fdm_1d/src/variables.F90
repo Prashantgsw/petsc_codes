@@ -29,7 +29,7 @@ use petscts
    ! auxillary condition
    real(dp) :: amplitude = 1.d0, alpha = 128.d0, x_0 = 0.4d0
    
-   character*64  :: space_disc = 'CD6', time_disc ! 0 : explicit, 1 : implicit
+   character*64  :: space_disc, time_disc ! 0 : explicit, 1 : implicit
    integer  :: nrk
    real(dp) :: ark(3)
 
