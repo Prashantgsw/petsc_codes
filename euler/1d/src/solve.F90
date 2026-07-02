@@ -9,6 +9,7 @@ use double
 use variables
 use fdm
 use read_write
+use auxillary_conditions
 implicit none
 contains
 
@@ -26,8 +27,10 @@ Vec            :: yg
 Vec            :: r
 type(tsdata)   :: ctx
 Vec            :: localU
-PetscScalar, pointer :: u(:), res(:)
+PetscScalar, pointer :: u(:,:), res(:,:)
 PetscErrorCode :: ierr
+integer        :: k
+PetscScalar    :: dres(ist:ien)
 PetscOffset :: index_u, index_res
 
 call TSGetDM(ts, da, ierr)
@@ -38,13 +41,16 @@ call DMGlobalToLocalBegin(da, yg, INSERT_VALUES, localU, ierr)
 CHKERRQ(ierr)
 call DMGlobalToLocalEnd(da, yg, INSERT_VALUES, localU, ierr)
 CHKERRQ(ierr)
-call DMDAVecGetArrayReadF90(da, localU, u, ierr)
+call DMDAVecGetArrayF90(da, localU, u, ierr)
 CHKERRQ(ierr)
 call DMDAVecGetArrayF90(da, r, res, ierr)
 CHKERRQ(ierr)
-call finite_diffence_method(u, res, ctx)
-res = -speed * res
-call DMDAVecRestoreArrayReadF90(da, localU, u, ierr)
+call ApplyPhysicalBC(u, stencil_width)
+do k = 0, dof-1
+   call finite_diffence_method(u(k,:), dres, ctx)
+   res(k,:) = -speed * dres
+enddo
+call DMDAVecRestoreArrayF90(da, localU, u, ierr)
 CHKERRQ(ierr)
 call DMDAVecRestoreArrayF90(da, r, res, ierr)
 CHKERRQ(ierr)

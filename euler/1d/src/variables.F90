@@ -19,6 +19,7 @@ use petscts
    PetscErrorCode     :: ierr
    PetscInt           :: rank, nproc, one = 1, zero = 0
    PetscInt           :: stencil_width
+   PetscInt           :: dof = 3   ! number of conserved variables: rho, rho*u, rhoE
    PetscReal          :: speed = 1.d0
 
    DM                 :: da

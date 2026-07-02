@@ -21,7 +21,7 @@ use fdm
 implicit none
 ! petsc datatypes
 PetscInt           :: loc
-PetscScalar        :: xp, fun
+PetscScalar        :: xp, fun(3)
 ! datatypes
 real(dp)           :: runtime
 character(len=128) :: fmt1, fmt2, fmt3, fmt4
@@ -53,7 +53,7 @@ call set_and_braodcast_parameters(ctx)
 
 ! Creates an object that will manage the communication of one-dimensional regular array data
 ! that is distributed across some processors. 
-call DMDACreate1d(PETSC_COMM_WORLD, DM_BOUNDARY_PERIODIC, ctx%g%Np, 1, stencil_width, &
+call DMDACreate1d(PETSC_COMM_WORLD, DM_BOUNDARY_GHOSTED, ctx%g%Np, 3, stencil_width, &
                   PETSC_NULL_INTEGER, da, ierr) 
 CHKERRQ(ierr)
 call DMSetFromOptions(da, ierr) 
@@ -83,7 +83,7 @@ ctx%g%dx = (ctx%g%xmax - ctx%g%xmin) / dble(ctx%g%Np)
 do i = ist, ien
    xp = (i-1)*ctx%g%dx ; loc = i-1
    call initial_condition(xp, fun)
-   call VecSetValues(ug, one, loc, fun, INSERT_VALUES, ierr)
+   call VecSetValuesBlocked(ug, one, loc, fun, INSERT_VALUES, ierr)
    CHKERRQ(ierr)
 enddo
 call VecAssemblyBegin(ug, ierr); CHKERRQ(ierr)
@@ -149,7 +149,7 @@ call VecDuplicate(ug, ue, ierr); CHKERRQ(ierr)
 do i = ist, ien
    xp = (i-1)*ctx%g%dx ; loc = i-1
    call exact_solution(xp, fun, ctx)
-   call VecSetValues(ue, one, loc, fun, INSERT_VALUES, ierr)
+   call VecSetValuesBlocked(ue, one, loc, fun, INSERT_VALUES, ierr)
    CHKERRQ(ierr)
 enddo
 call VecAssemblyBegin(ue, ierr); CHKERRQ(ierr)
