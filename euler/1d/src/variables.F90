@@ -38,6 +38,11 @@ use petscts
    logical  :: petsc_ts = .true.
 
    integer  :: ist, ien, gist, gien
+   ! Sod shock tube parameters
+   real(dp) :: gamma_gas = 1.4d0
+   real(dp) :: x_disc = 0.5d0
+   real(dp) :: rho_L = 1.0d0,   u_L = 0.0d0,   p_L = 1.0d0
+   real(dp) :: rho_R = 0.125d0, u_R = 0.0d0,   p_R = 0.1d0
 
    type grid
       PetscInt    :: Np = 100

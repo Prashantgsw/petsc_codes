@@ -9,11 +9,18 @@ contains
 subroutine initial_condition(xp, fun)
 implicit none
 PetscScalar  :: xp, fun(3)
-! PLACEHOLDER: same Gaussian in all 3 components, just to verify dof=3 plumbing.
-! Real Sod IC (rho, rho*u, E piecewise) comes in step 3.
-fun(1) = amplitude * exp(-alpha*(xp - x_0)**2)
-fun(2) = fun(1)
-fun(3) = fun(1)
+real(dp)     :: rho, u, p
+
+if (xp < x_disc) then
+   rho = rho_L; u = u_L; p = p_L
+else
+   rho = rho_R; u = u_R; p = p_R
+endif
+
+fun(1) = rho
+fun(2) = rho * u
+fun(3) = p/(gamma_gas - 1.0d0) + 0.5d0*rho*u*u
+
 end subroutine initial_condition
 
 subroutine exact_solution(xp, fun, ctx)
@@ -26,7 +33,6 @@ fun(3) = fun(1)
 end subroutine exact_solution
 
 ! TEMPORARY ghost-cell fill (constant extrapolation), NOT the final Dirichlet BC.
-! Real Dirichlet BC (fixed left/right conservative states) comes in step 5.
 subroutine ApplyPhysicalBC(ua_bc, ng)
 implicit none
 integer     :: ng

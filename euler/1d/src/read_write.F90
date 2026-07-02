@@ -27,15 +27,15 @@ call VecScatterEnd(vsc, ug, uall, INSERT_VALUES, SCATTER_FORWARD, ierr)
 CHKERRQ(ierr)
 call VecScatterDestroy(vsc, ierr); CHKERRQ(ierr)
 
-!call VecView(uall, PETSC_VIEWER_STDOUT_WORLD, ierr); CHKERRQ(ierr)
 if(rank==0)then
   call VecGetArrayF90(uall, ua, ierr); CHKERRQ(ierr)
-  
+
   write(filename, '(a,i7.7,a)') 'solution_', iter, '.dat'
   open(10,file=trim(filename))
-  write(10,*) '# xg, ug'
+  write(10,*) '# x, rho, rho*u, rhoE'
   do i = 1, ctx%g%Np
-     write(10, *) ctx%g%xmin+(i-1)*ctx%g%dx, ua(i)
+     write(10, *) ctx%g%xmin+(i-1)*ctx%g%dx, &
+                  ua(dof*(i-1)+1), ua(dof*(i-1)+2), ua(dof*(i-1)+3)
   enddo  
   close(10)
   call VecRestoreArrayF90(uall, ua, ierr); CHKERRQ(ierr)
