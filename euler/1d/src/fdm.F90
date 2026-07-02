@@ -43,6 +43,7 @@ end select
 
 end subroutine finite_diffence_method
 
+!all schemes below now return the PURE spatial derivative d(ua)/dx.
 
 subroutine CD2(ua, res, ctx)
 implicit none
@@ -54,7 +55,7 @@ real(dp)     :: idx
 
 idx = 0.5d0/ctx%g%dx
 do i = ist, ien
-   res(i) = - speed * (ua(i+1)-ua(i-1))
+   res(i) = (ua(i+1)-ua(i-1))
 enddo
 res = res * idx
 end subroutine CD2
@@ -73,8 +74,8 @@ a_p1 = - a_m1
 a_p2 = - a_m2
 idx  = 1.d0/ctx%g%dx
 do i = ist, ien
-   res(i) = - speed * ( a_m2*ua(i-2) + a_m1*ua(i-1) + &
-                        a_p1*ua(i+1) + a_p2*ua(i+2) )
+   res(i) = ( a_m2*ua(i-2) + a_m1*ua(i-1) + &
+              a_p1*ua(i+1) + a_p2*ua(i+2) )
 enddo
 res = res * idx
 end subroutine CD4
@@ -95,8 +96,8 @@ a_p2 = - a_m2
 a_p3 = - a_m3
 idx  = 1.d0/ctx%g%dx
 do i = ist, ien
-   res(i) = - speed * ( a_m3*ua(i-3) + a_m2*ua(i-2) + a_m1*ua(i-1) + &
-                        a_p1*ua(i+1) + a_p2*ua(i+2) + a_p3*ua(i+3) )
+   res(i) = ( a_m3*ua(i-3) + a_m2*ua(i-2) + a_m1*ua(i-1) + &
+              a_p1*ua(i+1) + a_p2*ua(i+2) + a_p3*ua(i+3) )
 enddo
 res = res * idx
 end subroutine CD6
@@ -119,8 +120,8 @@ a_p3 = - a_m3
 a_p4 = - a_m4
 idx  = 1.d0/ctx%g%dx
 do i = ist, ien
-   res(i) = - speed * ( a_m4*ua(i-4) + a_m3*ua(i-3) + a_m2*ua(i-2) + a_m1*ua(i-1) + &
-                        a_p1*ua(i+1) + a_p2*ua(i+2) + a_p3*ua(i+3) + a_p4*ua(i+4) )
+   res(i) = ( a_m4*ua(i-4) + a_m3*ua(i-3) + a_m2*ua(i-2) + a_m1*ua(i-1) + &
+              a_p1*ua(i+1) + a_p2*ua(i+2) + a_p3*ua(i+3) + a_p4*ua(i+4) )
 enddo
 res = res * idx
 end subroutine CD8
@@ -153,18 +154,18 @@ b_p2 = 0.0
 
 idx = 1.0/ctx%g%dx
 ldia(gist) = 0.0 ; dia(gist) = 1.0 ; udia(gist) = 0.0 
-rhs(gist) = - speed * (ua(gist+1) - ua(gist)) * idx
+rhs(gist) = (ua(gist+1) - ua(gist)) * idx
 ldia(gist+1) = 0.0 ; dia(gist+1)  = 1.0 ; udia(gist+1) = 0.0
-rhs(gist+1) = - speed * (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
+rhs(gist+1) = (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
 do i = gist+2, gien-2
    ldia(i) = a_m1; dia(i) = a_0; udia(i) = a_p1
-   rhs(i) = - speed * ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
-                        b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
+   rhs(i) = ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
+              b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
 enddo
 ldia(gien-1) = 0.0 ; dia(gien-1) = 1.0 ; udia(gien-1) = 0.0
-rhs(gien-1) = - speed * (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
+rhs(gien-1) = (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
 ldia(gien) = 0.0 ; dia(gien)  = 1.0 ; udia(gien) = 0.0
-rhs(gien)  = - speed * (ua(gien) - ua(gien-1)) * idx
+rhs(gien)  = (ua(gien) - ua(gien-1)) * idx
 
 call tdma(ldia(gist+1:gien), dia(gist:gien), udia(gist:gien-1), & 
            rhs(gist:gien), res_tmp(gist:gien), gien-gist+1)
@@ -200,18 +201,18 @@ b_p2 = - b_m2
 
 idx = 1.0/ctx%g%dx
 ldia(gist) = 0.0 ; dia(gist) = 1.0 ; udia(gist) = 0.0 
-rhs(gist) = - speed * (ua(gist+1) - ua(gist)) * idx
+rhs(gist) = (ua(gist+1) - ua(gist)) * idx
 ldia(gist+1) = 0.0 ; dia(gist+1)  = 1.0 ; udia(gist+1) = 0.0
-rhs(gist+1) = - speed * (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
+rhs(gist+1) = (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
 do i = gist+2, gien-2
    ldia(i) = a_m1; dia(i) = a_0; udia(i) = a_p1
-   rhs(i) = - speed * ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
-                        b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
+   rhs(i) = ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
+              b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
 enddo
 ldia(gien-1) = 0.0 ; dia(gien-1) = 1.0 ; udia(gien-1) = 0.0
-rhs(gien-1) = - speed * (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
+rhs(gien-1) = (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
 ldia(gien) = 0.0 ; dia(gien)  = 1.0 ; udia(gien) = 0.0
-rhs(gien)  = - speed * (ua(gien) - ua(gien-1)) * idx
+rhs(gien)  = (ua(gien) - ua(gien-1)) * idx
 
 call tdma(ldia(gist+1:gien), dia(gist:gien), udia(gist:gien-1), & 
            rhs(gist:gien), res_tmp(gist:gien), gien-gist+1)
@@ -250,18 +251,18 @@ b_p2 = - b_m2
 
 idx = 1.0/ctx%g%dx
 ldia2(gist) = 0.0 ; ldia1(gist) = 0.0 ; dia(gist) = 1.0 ; udia1(gist) = 0.0 ; udia2(gist) = 0.0
-rhs(gist) = - speed * (ua(gist+1) - ua(gist)) * idx
+rhs(gist) = (ua(gist+1) - ua(gist)) * idx
 ldia2(gist+1) = 0.0 ; ldia1(gist+1) = 0.0 ; dia(gist+1)  = 1.0 ; udia1(gist+1) = 0.0 ; udia2(gist+1) = 0.0
-rhs(gist+1) = - speed * (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
+rhs(gist+1) = (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
 do i = gist+2, gien-2
    ldia2(i) = a_m2; ldia1(i) = a_m1; dia(i) = a_0; udia1(i) = a_p1; udia2(i) = a_p2
-   rhs(i) = - speed * ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
-                        b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
+   rhs(i) = ( b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
+              b_p1 * ua(i+1) + b_p2 * ua(i+2) ) * idx
 enddo
 ldia2(gien-1) = 0.0 ; ldia1(gien-1) = 0.0 ; dia(gien-1) = 1.0 ; udia1(gien-1) = 0.0 ; udia2(gien-1) = 0.0
-rhs(gien-1) = - speed * (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
+rhs(gien-1) = (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
 ldia2(gien) = 0.0 ; ldia1(gien) = 0.0 ; dia(gien)  = 1.0 ; udia1(gien) = 0.0 ; udia2(gien) = 0.0
-rhs(gien)  = - speed * (ua(gien) - ua(gien-1)) * idx
+rhs(gien)  = (ua(gien) - ua(gien-1)) * idx
 
 call pdma(ldia2(gist:gien), ldia1(gist:gien), dia(gist:gien), &
             udia1(gist:gien), udia2(gist:gien), & 
@@ -303,22 +304,22 @@ b_p3 = - b_m3
 
 idx = 1.0/ctx%g%dx
 ldia2(gist) = 0.0 ; ldia1(gist) = 0.0 ; dia(gist) = 1.0 ; udia1(gist) = 0.0 ; udia2(gist) = 0.0
-rhs(gist) = - speed * (ua(gist+1) - ua(gist)) * idx
+rhs(gist) = (ua(gist+1) - ua(gist)) * idx
 ldia2(gist+1) = 0.0 ; ldia1(gist+1) = 0.0 ; dia(gist+1)  = 1.0 ; udia1(gist+1) = 0.0 ; udia2(gist+1) = 0.0
-rhs(gist+1) = - speed * (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
+rhs(gist+1) = (0.5*ua(gist+2) - 0.5* ua(gist)) * idx
 ldia1(gist+2) = 0.0 ; ldia2(gist+2) = 0.0 ; dia(gist+2) = 1.0 ; udia1(gist+2) = 0.0 ; udia2(gist+2) = 0.0
-rhs(gist+2) = - speed * (0.5*ua(gist+3) - 0.5* ua(gist+1)) * idx
+rhs(gist+2) = (0.5*ua(gist+3) - 0.5* ua(gist+1)) * idx
 do i = gist+3, gien-3 
    ldia2(i) = a_m2; ldia1(i) = a_m1; dia(i) = a_0; udia1(i) = a_p1; udia2(i) = a_p2
-   rhs(i) = - speed * ( b_m3 * ua(i-3) + b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
-                        b_p1 * ua(i+1) + b_p2 * ua(i+2) + b_p3 * ua(i+3)) * idx
+   rhs(i) = ( b_m3 * ua(i-3) + b_m2 * ua(i-2) + b_m1 * ua(i-1) + b_0 * ua(i) + &
+              b_p1 * ua(i+1) + b_p2 * ua(i+2) + b_p3 * ua(i+3)) * idx
 enddo
 ldia2(gien-2) = 0.0 ; ldia1(gien-2) = 0.0 ; dia(gien-2) = 1.0 ; udia2(gien-2) = 0.0 ; udia1(gien-2) = 0.0
-rhs(gien-2) = - speed * (0.5*ua(gien-1) - 0.5*ua(gien-3)) * idx
+rhs(gien-2) = (0.5*ua(gien-1) - 0.5*ua(gien-3)) * idx
 ldia2(gien-1) = 0.0 ; ldia1(gien-1) = 0.0 ; dia(gien-1) = 1.0 ; udia1(gien-1) = 0.0 ; udia2(gien-1) = 0.0
-rhs(gien-1) = - speed * (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
+rhs(gien-1) = (0.5*ua(gien) - 0.5*ua(gien-2)) * idx
 ldia2(gien) = 0.0 ; ldia1(gien) = 0.0 ; dia(gien)  = 1.0 ; udia1(gien) = 0.0 ; udia2(gien) = 0.0
-rhs(gien)  = - speed * (ua(gien) - ua(gien-1)) * idx
+rhs(gien)  = (ua(gien) - ua(gien-1)) * idx
 
 
 call pdma(ldia2(gist:gien), ldia1(gist:gien), dia(gist:gien), &
@@ -417,7 +418,5 @@ subroutine pdma(e3, a3, b3, c3, f3, d3, xa, N)
    deallocate(beta, gamma)
 
 end subroutine pdma
-
-
 
 end module fdm

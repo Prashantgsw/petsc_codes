@@ -43,6 +43,7 @@ CHKERRQ(ierr)
 call DMDAVecGetArrayF90(da, r, res, ierr)
 CHKERRQ(ierr)
 call finite_diffence_method(u, res, ctx)
+res = -speed * res
 call DMDAVecRestoreArrayReadF90(da, localU, u, ierr)
 CHKERRQ(ierr)
 call DMDAVecRestoreArrayF90(da, r, res, ierr)
