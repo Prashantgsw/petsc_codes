@@ -330,6 +330,21 @@ res(ist:ien) = res_tmp(ist:ien)
 
 end subroutine LELE_CD10
 
+! Simple 2nd-order artificial dissipation operator
+! grid-scale numerical stabilization for discontinuous data
+subroutine artificial_dissipation(ua, res, ctx)
+implicit none
+type(tsdata) :: ctx
+PetscScalar  :: ua(gist:gien), res(ist:ien)
+integer      :: i
+real(dp)     :: idx2
+
+idx2 = 1.d0/(ctx%g%dx**2)
+do i = ist, ien
+   res(i) = (ua(i+1) - 2.d0*ua(i) + ua(i-1)) * idx2
+enddo
+end subroutine artificial_dissipation
+
 
 subroutine tdma(a3, b3, c3, d3, xa, N)
 implicit none

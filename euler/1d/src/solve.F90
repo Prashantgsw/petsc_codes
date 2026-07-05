@@ -31,8 +31,13 @@ PetscScalar, pointer :: u(:,:), res(:,:)
 PetscErrorCode :: ierr
 integer        :: k
 PetscScalar    :: dres(ist:ien)
+PetscScalar    :: diss(ist:ien)
+real(dp)       :: nu_art, wave_speed_max  !nu_art is dissipation coefficient, nu_art = 0.01* wave_speed_max *dx
 PetscScalar    :: localFlux(0:dof-1, gist:gien)
 PetscOffset :: index_u, index_res
+
+wave_speed_max = max(abs(u_L)+sqrt(gamma_gas*p_L/rho_L), abs(u_R)+sqrt(gamma_gas*p_R/rho_R))
+nu_art = 0.25d0 * wave_speed_max * ctx%g%dx
 
 call TSGetDM(ts, da, ierr)
 CHKERRQ(ierr)
@@ -50,7 +55,8 @@ call ApplyPhysicalBC(u, stencil_width)
 call compute_euler_flux(u, localFlux, ctx)
 do k = 0, dof-1
    call finite_diffence_method(localFlux(k,:), dres, ctx)
-   res(k,:) = -dres
+   call artificial_dissipation(u(k,:), diss, ctx)
+   res(k,:) = -dres + nu_art*diss
 enddo
 call DMDAVecRestoreArrayF90(da, localU, u, ierr)
 CHKERRQ(ierr)
