@@ -90,7 +90,13 @@ call VecAssemblyBegin(ug, ierr); CHKERRQ(ierr)
 call VecAssemblyEnd(ug, ierr); CHKERRQ(ierr)
 ! settin time stepping
 ctx%g%time = 0.d0
-ctx%g%dt   = ctx%g%cfl * ctx%g%dx / (speed + 1.d-13)
+block
+  real(dp) :: c_L, c_R, wave_speed_max
+  c_L = sqrt(gamma_gas*p_L/rho_L)
+  c_R = sqrt(gamma_gas*p_R/rho_R)
+  wave_speed_max = max(abs(u_L)+c_L, abs(u_R)+c_R)
+  ctx%g%dt = ctx%g%cfl * ctx%g%dx / (wave_speed_max + 1.d-13)
+end block
 ctx%g%iter = 0
 
 if(rank==0) call log_parameters(ctx)
