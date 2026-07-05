@@ -32,16 +32,27 @@ fun(2) = fun(1)
 fun(3) = fun(1)
 end subroutine exact_solution
 
-! TEMPORARY ghost-cell fill (constant extrapolation), NOT the final Dirichlet BC.
+! Dirichlet BC: fix ghost cells to the true left/right conservative states.
 subroutine ApplyPhysicalBC(ua_bc, ng)
 implicit none
 integer     :: ng
 PetscScalar :: ua_bc(3, gist:gien)
 integer     :: k
-do k = 1, ng
-   ua_bc(:, ist-k) = ua_bc(:, ist)
-   ua_bc(:, ien+k) = ua_bc(:, ien)
-enddo
+real(dp)    :: rhoE_L, rhoE_R
+
+rhoE_L = p_L/(gamma_gas - 1.0d0) + 0.5d0*rho_L*u_L*u_L
+rhoE_R = p_R/(gamma_gas - 1.0d0) + 0.5d0*rho_R*u_R*u_R
+
+ do k = 1, ng
+   ua_bc(1, ist-k) = rho_L
+   ua_bc(2, ist-k) = rho_L*u_L
+   ua_bc(3, ist-k) = rhoE_L
+
+   ua_bc(1, ien+k) = rho_R
+   ua_bc(2, ien+k) = rho_R*u_R
+   ua_bc(3, ien+k) = rhoE_R
+ enddo
+
 end subroutine ApplyPhysicalBC
 
 !Conservative to primitive variable to flux vector
