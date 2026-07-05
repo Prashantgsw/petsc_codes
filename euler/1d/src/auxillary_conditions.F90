@@ -44,4 +44,26 @@ do k = 1, ng
 enddo
 end subroutine ApplyPhysicalBC
 
+!Conservative to primitive variable to flux vector
+subroutine compute_euler_flux(u, flux, ctx)
+implicit none
+type(tsdata) :: ctx
+PetscScalar  :: u(3,gist:gien), flux(3,gist:gien)
+integer      :: i
+real(dp)     :: rho, mom, rhoE, vel, p
+
+do i = gist, gien
+   rho  = u(1,i)
+   mom  = u(2,i)
+   rhoE = u(3,i)
+   vel  = mom / rho
+   p    = (gamma_gas - 1.0d0) * (rhoE - 0.5d0*rho*vel*vel)
+
+   flux(1,i) = mom
+   flux(2,i) = mom*vel + p
+   flux(3,i) = vel*(rhoE + p)
+enddo
+
+end subroutine compute_euler_flux
+
 end module auxillary_conditions

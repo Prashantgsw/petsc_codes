@@ -31,6 +31,7 @@ PetscScalar, pointer :: u(:,:), res(:,:)
 PetscErrorCode :: ierr
 integer        :: k
 PetscScalar    :: dres(ist:ien)
+PetscScalar    :: localFlux(0:dof-1, gist:gien)
 PetscOffset :: index_u, index_res
 
 call TSGetDM(ts, da, ierr)
@@ -46,9 +47,10 @@ CHKERRQ(ierr)
 call DMDAVecGetArrayF90(da, r, res, ierr)
 CHKERRQ(ierr)
 call ApplyPhysicalBC(u, stencil_width)
+call compute_euler_flux(u, localFlux, ctx)
 do k = 0, dof-1
-   call finite_diffence_method(u(k,:), dres, ctx)
-   res(k,:) = -speed * dres
+   call finite_diffence_method(localFlux(k,:), dres, ctx)
+   res(k,:) = -dres
 enddo
 call DMDAVecRestoreArrayF90(da, localU, u, ierr)
 CHKERRQ(ierr)
