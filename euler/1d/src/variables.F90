@@ -14,6 +14,7 @@ use petscts
    implicit none
 
    real(dp) :: pi = 4.d0*atan(1.d0), eps = 1.d-12, tolerance
+   real(dp) :: nu_coeff = 0.25d0  !artificial dissipation coefficient, tunable
    PetscReal      :: pp
 
    PetscErrorCode     :: ierr

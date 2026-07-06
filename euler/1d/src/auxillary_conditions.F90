@@ -23,7 +23,7 @@ fun(3) = p/(gamma_gas - 1.0d0) + 0.5d0*rho*u*u
 
 end subroutine initial_condition
 
-! --- Exact Sod shock tube solution (Toro, "Riemann Solvers", standard method) ---
+!Exact Sod shock tube solution
 
 real(dp) function f_K(p, rhoK, pK, cK)
 implicit none

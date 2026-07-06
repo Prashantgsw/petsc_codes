@@ -56,6 +56,8 @@ if(rank == 0)then
 
    print*, "Enter stencil width"
    read(*,*) stencil_width
+   print*, "Enter artificial dissipation coefficient (nu_coeff)"
+   read(*,*) nu_coeff
 
 endif
 
@@ -63,6 +65,7 @@ call MPI_Barrier(PETSC_COMM_WORLD, ierr)
 
 call MPI_Bcast(stencil_width, 1, MPI_int, 0, PETSC_COMM_WORLD, ierr)
 call MPI_Bcast(space_disc,64,MPI_CHARACTER,0,PETSC_COMM_WORLD,ierr)
+call MPI_Bcast(nu_coeff, 1, MPI_DOUBLE_PRECISION, 0, PETSC_COMM_WORLD, ierr)
 
 end subroutine set_and_braodcast_parameters
 

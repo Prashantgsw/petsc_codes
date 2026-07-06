@@ -37,7 +37,7 @@ PetscScalar    :: localFlux(0:dof-1, gist:gien)
 PetscOffset :: index_u, index_res
 
 wave_speed_max = max(abs(u_L)+sqrt(gamma_gas*p_L/rho_L), abs(u_R)+sqrt(gamma_gas*p_R/rho_R))
-nu_art = 0.3d0 * wave_speed_max * ctx%g%dx
+nu_art = nu_coeff * wave_speed_max * ctx%g%dx
 
 call TSGetDM(ts, da, ierr)
 CHKERRQ(ierr)
