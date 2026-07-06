@@ -45,7 +45,7 @@ use petscts
    real(dp) :: rho_R = 0.125d0, u_R = 0.0d0,   p_R = 0.1d0
 
    type grid
-      PetscInt    :: Np = 400
+      PetscInt    :: Np = 800
       PetscReal   :: dx, xmin=0.d0, xmax=1.d0
       integer     :: iter, itmax=10000, itsave=10
       PetscReal   :: dt, cfl = 0.75, time, final_time=0.2d0      
