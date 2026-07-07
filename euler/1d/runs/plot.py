@@ -1,8 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.join(script_dir, "..", "src")
 
 filename = input("Enter data file name: ")
-data = np.loadtxt(filename)
+filepath = os.path.join(src_dir, filename)
+data = np.loadtxt(filepath)
 
 x    = data[:,0]
 rho  = data[:,1]
