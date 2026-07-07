@@ -14,7 +14,7 @@ use petscts
    implicit none
 
    real(dp) :: pi = 4.d0*atan(1.d0), eps = 1.d-12, tolerance
-   real(dp) :: nu_coeff = 0.25d0  !artificial dissipation coefficient, tunable
+   real(dp) :: nu_coeff !artificial dissipation coefficient, tunable
    PetscReal      :: pp
 
    PetscErrorCode     :: ierr
@@ -46,7 +46,7 @@ use petscts
    real(dp) :: rho_R = 0.125d0, u_R = 0.0d0,   p_R = 0.1d0
 
    type grid
-      PetscInt    :: Np = 800
+      PetscInt    :: Np = 400
       PetscReal   :: dx, xmin=0.d0, xmax=1.d0
       integer     :: iter, itmax=10000, itsave=10
       PetscReal   :: dt, cfl = 0.75, time, final_time=0.2d0      

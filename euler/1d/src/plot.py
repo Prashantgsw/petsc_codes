@@ -9,10 +9,13 @@ rho  = data[:,1]
 rhou = data[:,2]
 rhoE = data[:,3]
 
+gamma = 1.4
+u = rhou / rho
+p = (gamma - 1.0) * (rhoE - 0.5*rho*u*u)
+
 t = float(input("Enter physical time for this snapshot: "))
 
-#Sod exact solution (Toro's method)
-gamma = 1.4
+# --- Sod exact solution (Toro's method) ---
 x_disc = 0.5
 rho_L, u_L, p_L = 1.0, 0.0, 1.0
 rho_R, u_R, p_R = 0.125, 0.0, 0.1
@@ -51,7 +54,6 @@ def solve_star_region():
 def sample_sod(S, p_star, u_star):
     c_L = np.sqrt(gamma*p_L/rho_L)
     c_R = np.sqrt(gamma*p_R/rho_R)
-
     if S <= u_star:
         if p_star > p_L:
             rho_star = rho_L * ((p_star/p_L + (gamma-1)/(gamma+1)) /
@@ -70,11 +72,11 @@ def sample_sod(S, p_star, u_star):
             elif S > S_tail:
                 return rho_L*(p_star/p_L)**(1/gamma), u_star, p_star
             else:
-                u = 2.0/(gamma+1) * (c_L + (gamma-1)/2*u_L + S)
-                c = 2.0/(gamma+1) * (c_L + (gamma-1)/2*(u_L - S))
-                rho = rho_L*(c/c_L)**(2/(gamma-1))
-                p = p_L*(c/c_L)**(2*gamma/(gamma-1))
-                return rho, u, p
+                u_loc = 2.0/(gamma+1) * (c_L + (gamma-1)/2*u_L + S)
+                c_loc = 2.0/(gamma+1) * (c_L + (gamma-1)/2*(u_L - S))
+                rho_loc = rho_L*(c_loc/c_L)**(2/(gamma-1))
+                p_loc = p_L*(c_loc/c_L)**(2*gamma/(gamma-1))
+                return rho_loc, u_loc, p_loc
     else:
         if p_star > p_R:
             rho_star = rho_R * ((p_star/p_R + (gamma-1)/(gamma+1)) /
@@ -93,11 +95,11 @@ def sample_sod(S, p_star, u_star):
             elif S < S_tail:
                 return rho_R*(p_star/p_R)**(1/gamma), u_star, p_star
             else:
-                u = 2.0/(gamma+1) * (-c_R + (gamma-1)/2*u_R + S)
-                c = 2.0/(gamma+1) * (c_R - (gamma-1)/2*(u_R - S))
-                rho = rho_R*(c/c_R)**(2/(gamma-1))
-                p = p_R*(c/c_R)**(2*gamma/(gamma-1))
-                return rho, u, p
+                u_loc = 2.0/(gamma+1) * (-c_R + (gamma-1)/2*u_R + S)
+                c_loc = 2.0/(gamma+1) * (c_R - (gamma-1)/2*(u_R - S))
+                rho_loc = rho_R*(c_loc/c_R)**(2/(gamma-1))
+                p_loc = p_R*(c_loc/c_R)**(2*gamma/(gamma-1))
+                return rho_loc, u_loc, p_loc
 
 p_star, u_star = solve_star_region()
 
@@ -115,39 +117,30 @@ for i, xp in enumerate(x):
         else:
             rho_exact[i], u_exact[i], p_exact[i] = rho_R, u_R, p_R
 
-rhou_exact = rho_exact*u_exact
-rhoE_exact = p_exact/(gamma-1.0) + 0.5*rho_exact*u_exact**2
-
 title_suffix = f" (t={t:.4f}, N={len(x)})"
 
 plt.figure()
 plt.plot(x, rho, label='numerical')
 plt.plot(x, rho_exact, '--', label='exact')
-plt.xlabel("x")
-plt.ylabel(r"$\rho$")
+plt.xlabel("x"); plt.ylabel(r"$\rho$")
 plt.title("Density" + title_suffix)
-plt.legend()
-plt.grid(True)
+plt.legend(); plt.grid(True)
 plt.savefig("rho_compare.png")
 
 plt.figure()
-plt.plot(x, rhou, label='numerical')
-plt.plot(x, rhou_exact, '--', label='exact')
-plt.xlabel("x")
-plt.ylabel(r"$\rho u$")
-plt.title("Momentum" + title_suffix)
-plt.legend()
-plt.grid(True)
-plt.savefig("rhou_compare.png")
+plt.plot(x, u, label='numerical')
+plt.plot(x, u_exact, '--', label='exact')
+plt.xlabel("x"); plt.ylabel(r"$u$")
+plt.title("Velocity" + title_suffix)
+plt.legend(); plt.grid(True)
+plt.savefig("u_compare.png")
 
 plt.figure()
-plt.plot(x, rhoE, label='numerical')
-plt.plot(x, rhoE_exact, '--', label='exact')
-plt.xlabel("x")
-plt.ylabel(r"$\rho E$")
-plt.title("Energy" + title_suffix)
-plt.legend()
-plt.grid(True)
-plt.savefig("rhoE_compare.png")
+plt.plot(x, p, label='numerical')
+plt.plot(x, p_exact, '--', label='exact')
+plt.xlabel("x"); plt.ylabel(r"$p$")
+plt.title("Pressure" + title_suffix)
+plt.legend(); plt.grid(True)
+plt.savefig("p_compare.png")
 
 plt.show()
