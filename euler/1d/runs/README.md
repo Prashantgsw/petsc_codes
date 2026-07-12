@@ -120,9 +120,10 @@ profiles matching the exact solution closely across all three regions.
 
 #7. Known limitations and ongoing work
 
-- The artificial dissipation coefficient is uniform across the domain and
+1 The artificial dissipation coefficient is uniform across the domain and
   must be manually tuned per grid resolution and scheme order; a
   discontinuity-adaptive dissipation scheme is under consideration as a
   more robust alternative.
-- The CFL timestep is currently computed only once from the initial condition and used throughout the computation,
+  
+2 The CFL timestep is currently computed only once from the initial condition and used throughout the computation,
   rather than adaptively from the evolving solution's local wave speeds.
