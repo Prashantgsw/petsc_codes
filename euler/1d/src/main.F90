@@ -1,4 +1,4 @@
-! solves linear 1D convection equation: u_t + c * u_x = 0 for periodic boundary conditions:
+! solves 1D euler equation: dU/dt + dF(U)/dx = 0
 ! using finite difference methods, PETSc DMDA and time stepping.
 ! written by: Ashish Bhole.
 program main
