@@ -25,16 +25,16 @@ implicit none
   TSType             :: time_scheme
 
   ! auxillary condition
-  PetscReal          :: speed_x = 1.d0, speed_y = 1.d0
-  real(dp)           :: amplitude = 1.d0, alpha = 64.d0, x_0 = 0.5d0, y_0= 0.5d0
+  PetscReal          :: speed_chi = 1.d0, speed_eta = 1.d0    !chi = x and eta = y
+  real(dp)           :: amplitude = 1.d0, alpha = 64.d0, chi_0 = 0.5d0, eta_0= 0.5d0
   
   logical            :: petsc_ts
   character*64       :: space_disc
   integer            :: stencil_type         ! 1 for star, 2 for box
-  PetscInt           :: stencil_width = 20
+  PetscInt           :: stencil_width = 10
 
   PetscInt           :: Nx = 100, Ny = 100
-  PetscReal          :: dx, dy, xmin=0.d0, xmax=1.d0, ymin=0.d0, ymax=1.d0
+  PetscReal          :: dchi, deta, chi_min=0.d0, chi_max=1.d0, eta_min=0.d0, eta_max=1.d0 !dchi =dx and deta = dy
   PetscReal          :: dt, cfl, time=0.d0, final_time
   PetscInt           :: ibeg, jbeg, Nx_loc, Ny_loc
   PetscInt           :: ibeg_ghosted, Nx_loc_ghosted

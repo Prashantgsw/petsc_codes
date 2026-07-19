@@ -21,7 +21,7 @@ use fdm
 implicit none
   ! petsc datatypes
   PetscInt           :: loc
-  PetscScalar        :: xp, yp, fun
+  PetscScalar        :: chi_p, eta_p, fun
   ! datatypes
   real(dp)           :: runtime
   character(len=128) :: fmt1, fmt2, fmt3, fmt4
@@ -66,7 +66,7 @@ implicit none
   ! Returns the global (x,y,z) indices of the lower left corner and size of the local region, excluding ghost points.
   call DMDAGetCorners(da, ibeg, jbeg, PETSC_NULL_INTEGER, &
                           Nx_loc, Ny_loc, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
-  call DMDASetUniformCoordinates(da, xmin, xmax, ymin, ymax, 0.d0, 0.d0, ierr); CHKERRQ(ierr)
+  call DMDASetUniformCoordinates(da, chi_min, chi_max, eta_min, eta_max, 0.d0, 0.d0, ierr); CHKERRQ(ierr)
   ! This is used to control no of grid points from command line
   call DMDAGetInfo(da, PETSC_NULL_INTEGER, Nx, Ny, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, &
                    PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
@@ -79,12 +79,12 @@ implicit none
   
   ! setting equidistant grid and initial condition on it.
   call DMDAVecGetArrayF90(da, ug, u, ierr); CHKERRQ(ierr)
-  dx = (xmax - xmin) / dble(Nx)
-  dy = (ymax - ymin) / dble(Ny)
+  dchi = (chi_max - chi_min) / dble(Nx) !deta is dy and dchi is dx
+  deta = (eta_max - eta_min) / dble(Ny)
   do j = jst, jen
   do i = ist, ien
-     xp = xmin+(i-1)*dx ; yp = ymin+(j-1)*dy
-     call initial_condition(xp, yp, fun)
+     chi_p = chi_min+(i-1)*dchi ; eta_p = eta_min+(j-1)*deta
+     call initial_condition(chi_p, eta_p, fun)
      u(i,j) = fun
   enddo
   enddo
@@ -93,7 +93,7 @@ implicit none
   ! settin time stepping
   time = 0.d0
   iter = 0
-  dt = cfl * dsqrt(dx*dx+dy*dy) / (dsqrt(speed_x**2+speed_y**2) + 1.d-13)  
+  dt = cfl * dsqrt(dchi*dchi+deta*deta) / (dsqrt(speed_chi**2+speed_eta**2) + 1.d-13)  
   
   if(petsc_ts)then ! solve using PETSc time stepping
   
@@ -137,15 +137,15 @@ implicit none
   call DMDAVecGetArrayF90(da, ue, u, ierr); CHKERRQ(ierr)
   do j = jst, jen
   do i = ist, ien
-     xp = xmin+(i-1)*dx ; yp = ymin+(j-1)*dy
-     call exact_solution(xp, yp, fun)
+     chi_p = chi_min+(i-1)*dchi ; eta_p = eta_min+(j-1)*deta
+     call exact_solution(chi_p, eta_p, fun)
      u(i,j) = fun
   enddo
   enddo
   call DMDAVecRestoreArrayF90(da, ue, u, ierr); CHKERRQ(ierr)
   call VecAXPY(ue, -1.d0, ug, ierr); CHKERRQ(ierr)
   call VecNorm(ue, NORM_2, err_l2, ierr); CHKERRQ(ierr)
-  print*, sqrt(dx*dy), err_l2 * dsqrt(1.d0/(Nx*Ny))
+  print*, sqrt(dchi*deta), err_l2 * dsqrt(1.d0/(Nx*Ny))
   
   ! destroy petsc objects
   call VecDestroy(ue, ierr); CHKERRQ(ierr)
