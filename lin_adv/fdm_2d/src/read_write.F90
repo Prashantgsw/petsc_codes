@@ -35,7 +35,7 @@ subroutine save_solution(iter, ug)
               ", J=", jen-jst+1, ", DATAPACKING=POINT"
   do j = jst, jen
   do i = ist, ien
-     write(10, *) xmin+(i-1)*dx, ymin+(j-1)*dy, ua(i,j)
+     write(10, *) chi_min+(i-1)*dchi, eta_min+(j-1)*deta, ua(i,j) !deta = dy and dchi =dx
   enddo
   enddo
   close(10)
@@ -102,8 +102,8 @@ subroutine get_and_set_parameters()
     stop
   end select
   
-  speed_x = 1.d0
-  speed_y = 1.d0
+  speed_chi = 1.d0
+  speed_eta = 1.d0 
   
   ! is broadcasting of variables needed?
   !call MPI_Bcast(stencil_width, 1, MPI_int, 0, PETSC_COMM_WORLD, ierr)

@@ -21,7 +21,7 @@ use fdm
 implicit none
   ! petsc datatypes
   PetscInt           :: loc
-  PetscScalar        :: xp, yp, fun
+  PetscScalar        :: chi_p, eta_p, fun
   ! datatypes
   real(dp)           :: runtime
   character(len=128) :: fmt1, fmt2, fmt3, fmt4
@@ -51,10 +51,10 @@ implicit none
   
   ! Creates an object that will manage the communication of 2D regular array that is distributed across some processors. 
   if(stencil_type == 1)then
-    call DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_PERIODIC, DM_BOUNDARY_PERIODIC, DMDA_STENCIL_STAR, Nx, Ny, PETSC_DECIDE, PETSC_DECIDE, 1, stencil_width, &
+    call DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_PERIODIC, DM_BOUNDARY_PERIODIC, DMDA_STENCIL_STAR, N_chi, N_eta, PETSC_DECIDE, PETSC_DECIDE, 1, stencil_width, &
                       PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, da, ierr); CHKERRQ(ierr)
   elseif(stencil_type == 2)then
-    call DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_PERIODIC, DM_BOUNDARY_PERIODIC, DMDA_STENCIL_BOX, Nx, Ny, PETSC_DECIDE, PETSC_DECIDE, 1, stencil_width, &
+    call DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_PERIODIC, DM_BOUNDARY_PERIODIC, DMDA_STENCIL_BOX, N_chi, N_eta, PETSC_DECIDE, PETSC_DECIDE, 1, stencil_width, &
                       PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, da, ierr); CHKERRQ(ierr)        
   else
     write(*,*) 'please select a stencil type: 1 or 2'
@@ -65,26 +65,26 @@ implicit none
   call DMCreateGlobalVector(da, ug, ierr); CHKERRQ(ierr)
   ! Returns the global (x,y,z) indices of the lower left corner and size of the local region, excluding ghost points.
   call DMDAGetCorners(da, ibeg, jbeg, PETSC_NULL_INTEGER, &
-                          Nx_loc, Ny_loc, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
-  call DMDASetUniformCoordinates(da, xmin, xmax, ymin, ymax, 0.d0, 0.d0, ierr); CHKERRQ(ierr)
+                          N_chi_loc, N_eta_loc, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
+  call DMDASetUniformCoordinates(da, chi_min, chi_max, eta_min, eta_max, 0.d0, 0.d0, ierr); CHKERRQ(ierr)
   ! This is used to control no of grid points from command line
-  call DMDAGetInfo(da, PETSC_NULL_INTEGER, Nx, Ny, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, &
+  call DMDAGetInfo(da, PETSC_NULL_INTEGER, N_chi, N_eta, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, &
                    PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
-  call DMDAGetGhostCorners(da, ibeg_ghosted, jbeg_ghosted, PETSC_NULL_INTEGER, Nx_loc_ghosted, Ny_loc_ghosted, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
+  call DMDAGetGhostCorners(da, ibeg_ghosted, jbeg_ghosted, PETSC_NULL_INTEGER, N_chi_loc_ghosted, N_eta_loc_ghosted, PETSC_NULL_INTEGER, ierr); CHKERRQ(ierr)
   
-  ist = ibeg ; ien = ibeg+Nx_loc-1
-  jst = jbeg ; jen = jbeg+Ny_loc-1
-  gist = ibeg_ghosted ; gien = ibeg_ghosted+Nx_loc_ghosted-1
-  gjst = jbeg_ghosted ; gjen = jbeg_ghosted+Ny_loc_ghosted-1
+  ist = ibeg ; ien = ibeg+N_chi_loc-1
+  jst = jbeg ; jen = jbeg+N_eta_loc-1
+  gist = ibeg_ghosted ; gien = ibeg_ghosted+N_chi_loc_ghosted-1
+  gjst = jbeg_ghosted ; gjen = jbeg_ghosted+N_eta_loc_ghosted-1
   
   ! setting equidistant grid and initial condition on it.
   call DMDAVecGetArrayF90(da, ug, u, ierr); CHKERRQ(ierr)
-  dx = (xmax - xmin) / dble(Nx)
-  dy = (ymax - ymin) / dble(Ny)
+  dchi = (chi_max - chi_min) / dble(N_chi) !deta is dy and dchi is dx
+  deta = (eta_max - eta_min) / dble(N_eta)
   do j = jst, jen
   do i = ist, ien
-     xp = xmin+(i-1)*dx ; yp = ymin+(j-1)*dy
-     call initial_condition(xp, yp, fun)
+     chi_p = chi_min+(i-1)*dchi ; eta_p = eta_min+(j-1)*deta
+     call initial_condition(chi_p, eta_p, fun)
      u(i,j) = fun
   enddo
   enddo
@@ -93,7 +93,7 @@ implicit none
   ! settin time stepping
   time = 0.d0
   iter = 0
-  dt = cfl * dsqrt(dx*dx+dy*dy) / (dsqrt(speed_x**2+speed_y**2) + 1.d-13)  
+  dt = cfl * dsqrt(dchi*dchi+deta*deta) / (dsqrt(speed_chi**2+speed_eta**2) + 1.d-13)  
   
   if(petsc_ts)then ! solve using PETSc time stepping
   
@@ -137,15 +137,15 @@ implicit none
   call DMDAVecGetArrayF90(da, ue, u, ierr); CHKERRQ(ierr)
   do j = jst, jen
   do i = ist, ien
-     xp = xmin+(i-1)*dx ; yp = ymin+(j-1)*dy
-     call exact_solution(xp, yp, fun)
+     chi_p = chi_min+(i-1)*dchi ; eta_p = eta_min+(j-1)*deta
+     call exact_solution(chi_p, eta_p, fun)
      u(i,j) = fun
   enddo
   enddo
   call DMDAVecRestoreArrayF90(da, ue, u, ierr); CHKERRQ(ierr)
   call VecAXPY(ue, -1.d0, ug, ierr); CHKERRQ(ierr)
   call VecNorm(ue, NORM_2, err_l2, ierr); CHKERRQ(ierr)
-  print*, sqrt(dx*dy), err_l2 * dsqrt(1.d0/(Nx*Ny))
+  print*, sqrt(dchi*deta), err_l2 * dsqrt(1.d0/(N_chi*N_eta))
   
   ! destroy petsc objects
   call VecDestroy(ue, ierr); CHKERRQ(ierr)

@@ -36,13 +36,13 @@ subroutine CD2(ua, res)
   PetscScalar :: ua(gist:gien,gjst:gjen), res(ist:ien,jst:jen)
   ! Local variables
   integer        :: i, j
-  real(dp) :: idx, idy
+  real(dp) :: idchi, ideta
   
-  idx = 0.5d0/dx; idy = 0.5d0/dy
+  idchi = 0.5d0/dchi; ideta = 0.5d0/deta
   do j = jst, jen
   do i = ist, ien
-     res(i,j) = - speed_x * (ua(i+1,j)-ua(i-1,j)) * idx &
-                - speed_y * (ua(i,j+1)-ua(i,j-1)) * idy
+     res(i,j) = - speed_chi * (ua(i+1,j)-ua(i-1,j)) * idchi &
+                - speed_eta * (ua(i,j+1)-ua(i,j-1)) * ideta
   enddo
   enddo
 end subroutine CD2
@@ -52,17 +52,17 @@ subroutine CD4(ua, res)
   PetscScalar :: ua(gist:gien,gjst:gjen), res(ist:ien,jst:jen)
   ! Local variables
   integer  :: i, j
-  real(dp) :: idx, idy, a_m2, a_m1, a_p1, a_p2
+  real(dp) :: idchi, ideta, a_m2, a_m1, a_p1, a_p2
   
   a_m2 =  1.d0/12.d0
   a_m1 = -2.d0/3.d0
   a_p1 = - a_m1
   a_p2 = - a_m2
-  idx = 1.d0/dx; idy = 1.d0/dy
+  idchi = 1.d0/dchi; ideta = 1.d0/deta
   do j = jst, jen
   do i = ist, ien
-     res(i,j) = - speed_x * (a_m2*ua(i-2,j)+a_m1*ua(i-1,j)+a_p1*ua(i+1,j)+a_p2*ua(i+2,j)) * idx &
-                - speed_y * (a_m2*ua(i,j-2)+a_m1*ua(i,j-1)+a_p1*ua(i,j+1)+a_p2*ua(i,j+2)) * idy
+     res(i,j) = - speed_chi * (a_m2*ua(i-2,j)+a_m1*ua(i-1,j)+a_p1*ua(i+1,j)+a_p2*ua(i+2,j)) * idchi &
+                - speed_eta * (a_m2*ua(i,j-2)+a_m1*ua(i,j-1)+a_p1*ua(i,j+1)+a_p2*ua(i,j+2)) * ideta
   enddo
   enddo
 end subroutine CD4
@@ -72,7 +72,7 @@ subroutine CD6(ua, res)
   PetscScalar :: ua(gist:gien,gjst:gjen), res(ist:ien,jst:jen)
   ! Local variables
   integer  :: i, j
-  real(dp) :: idx, idy, a_m3, a_m2, a_m1, a_p1, a_p2, a_p3
+  real(dp) :: idchi, ideta, a_m3, a_m2, a_m1, a_p1, a_p2, a_p3
   
   a_m3 = - 1.d0/60.d0
   a_m2 =   3.d0/20.d0
@@ -80,11 +80,11 @@ subroutine CD6(ua, res)
   a_p1 = - a_m1
   a_p2 = - a_m2
   a_p3 = - a_m3
-  idx = 1.d0/dx; idy = 1.d0/dy
+  idchi = 1.d0/dchi; ideta = 1.d0/deta
   do j = jst, jen
   do i = ist, ien
-     res(i,j) = - speed_x * (a_m3*ua(i-3,j)+a_m2*ua(i-2,j)+a_m1*ua(i-1,j)+a_p1*ua(i+1,j)+a_p2*ua(i+2,j)+a_p3*ua(i+3,j)) * idx &
-                - speed_y * (a_m3*ua(i,j-3)+a_m2*ua(i,j-2)+a_m1*ua(i,j-1)+a_p1*ua(i,j+1)+a_p2*ua(i,j+2)+a_p3*ua(i,j+3)) * idy
+     res(i,j) = - speed_chi * (a_m3*ua(i-3,j)+a_m2*ua(i-2,j)+a_m1*ua(i-1,j)+a_p1*ua(i+1,j)+a_p2*ua(i+2,j)+a_p3*ua(i+3,j)) * idchi &
+                - speed_eta * (a_m3*ua(i,j-3)+a_m2*ua(i,j-2)+a_m1*ua(i,j-1)+a_p1*ua(i,j+1)+a_p2*ua(i,j+2)+a_p3*ua(i,j+3)) * ideta
   enddo
   enddo
 end subroutine CD6
@@ -96,23 +96,23 @@ subroutine LELE(ua, res)
   integer  :: i, j
   real(dp), dimension(gist:gien) :: uf_x, ud_x
   real(dp), dimension(gjst:gjen) :: uf_y, ud_y
-  real(dp) :: a_m1, a_0, a_p1, idx, idy
+  real(dp) :: a_m1, a_0, a_p1, idchi, ideta
   real(dp) :: b_m2, b_m1, b_0, b_p1, b_p2
   
   !interior nodes
   a_m1 = 1.d0/3.d0; a_0  = 1.d0; a_p1 = a_m1 
   b_m2 = -1.d0/36.d0; b_m1 = -14.d0/18.d0; b_0  = 0.d0; b_p1 = - b_m1; b_p2 = - b_m2
-  idx = 1.d0/dx; idy = 1.d0/dy
+  idchi = 1.d0/dchi; ideta = 1.d0/deta
   
   do j = jst, jen
      uf_x(:)   = ua(:, j)
-     call apply_compact_scheme(gist, gien, uf_x, ud_x, idx, a_m1, a_0, a_p1, b_m2, b_m1, b_0, b_p1, b_p2)
-     res(ist:ien, j) = res(ist:ien, j) + speed_x * ud_x(ist:ien)
+     call apply_compact_scheme(gist, gien, uf_x, ud_x, idchi, a_m1, a_0, a_p1, b_m2, b_m1, b_0, b_p1, b_p2)
+     res(ist:ien, j) = res(ist:ien, j) + speed_chi * ud_x(ist:ien)
   enddo
   do i = ist, ien
      uf_y(:)   = ua(i, :)
-     call apply_compact_scheme(gjst, gjen, uf_y, ud_y, idy, a_m1, a_0, a_p1, b_m2, b_m1, b_0, b_p1, b_p2)
-     res(i, jst:jen) = res(i, jst:jen) + speed_y * ud_y(jst:jen)
+     call apply_compact_scheme(gjst, gjen, uf_y, ud_y, ideta, a_m1, a_0, a_p1, b_m2, b_m1, b_0, b_p1, b_p2)
+     res(i, jst:jen) = res(i, jst:jen) + speed_eta * ud_y(jst:jen)
   enddo
 end subroutine LELE
 
